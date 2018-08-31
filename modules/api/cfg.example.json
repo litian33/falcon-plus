@@ -18,6 +18,26 @@
 		"call_timeout": 5000,
 		"numberOfReplicas": 500
 	},
+	"ldap":{
+		"enable":true,
+		"server":{
+			"host":"127.0.0.1",
+			"port":339,
+			"use_ssl":false,
+			"start_ssl":false,
+			"ssl_skip_verify":false
+		},
+		"binds":{
+			"bind_dn":"cn=client,dc=33,dc=cn",
+			"bind_passwd":"client",
+			"search_filter" : "(cn=%s)",
+			"search_base_dn":"dc=33,dc=cn"
+		},
+		"attributes":{
+			"remote":["sn","cn","email"],
+			"local":["surname","username","email"]
+		}
+	},
 	"metric_list_file": "./api/data/metric",
 	"web_port": ":8080",
 	"access_control": true,

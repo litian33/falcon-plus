@@ -23,6 +23,7 @@ import (
 	h "github.com/open-falcon/falcon-plus/modules/api/app/helper"
 	"github.com/open-falcon/falcon-plus/modules/api/app/model/uic"
 	"github.com/open-falcon/falcon-plus/modules/api/app/utils"
+	"github.com/spf13/viper"
 )
 
 type APILoginInput struct {
@@ -44,6 +45,30 @@ func Login(c *gin.Context) {
 	}
 	db.Uic.Where(&user).Find(&user)
 	switch {
+	case user.Passwd == "":{
+		if viper.GetBool("ldap.enable") && name != "root" {
+			luser, err := LdapLogin(&inputs)
+			if err != nil {
+				h.JSONR(c, badstatus, err.Error())
+				return
+			}
+
+			if user.ID ==0 {
+				// create new user without passwd
+				user.Cnname = luser.Cnname
+				user.Email = luser.Email
+				dt := db.Uic.Table("user").Create(&user)
+				if dt.Error != nil {
+					h.JSONR(c, http.StatusBadRequest, dt.Error)
+					return
+				}
+			}
+
+		}else{
+			h.JSONR(c, badstatus, "password error")
+			return
+		}
+	}
 	case user.Name == "":
 		h.JSONR(c, badstatus, "no such user")
 		return
